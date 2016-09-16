@@ -1,12 +1,14 @@
 'use strict';
 
-function deep_value_array(obj, path) {
+var path = require('path');
 
-  if(path.indexOf('.') === -1) {
-    return (typeof obj[path] !== 'undefined' && obj[path] !== null) ? obj[path] : null
+function deep_value_array(obj, pathDeep) {
+
+  if(pathDeep.indexOf('.') === -1) {
+    return (typeof obj[pathDeep] !== 'undefined' && obj[pathDeep] !== null) ? obj[pathDeep] : null
   }
 
-  var pathSplit = path.split('.')
+  var pathSplit = pathDeep.split('.')
   var res = JSON.parse(JSON.stringify(obj))
 
   while(pathSplit.length > 0) {
@@ -119,12 +121,12 @@ var hooks = {
 
 		return obj
 	},
-	beforeUpdate: function(json, oldFilePath, template, path, name, req, deleteFiles, abe) {
+	beforeUpdate: function(json, oldFilePath, template, pathUpdate, name, req, deleteFiles, abe) {
 		try {
 				
 			if(typeof deleteFiles !== 'undefined' && deleteFiles !== null && deleteFiles === true) {
 				abe.log.write('seo', 'afterDuplicate')
-		    var tplUrl = abe.FileParser.getFileDataFromUrl(abe.fileUtils.concatPath(abe.config.draft.url, oldFilePath))
+		    var tplUrl = abe.FileParser.getFileDataFromUrl(path.join(abe.config.draft.url, oldFilePath))
 		    var oldJson = abe.FileParser.getJson(tplUrl.json.path)
 
 		    if(typeof oldJson !== 'undefined' && oldJson !== null
@@ -133,9 +135,9 @@ var hooks = {
 		    	var alternates = oldJson.seoPlugin.alternates
 
 		    	if (oldJson.seoPlugin.alternates === oldJson.abe_meta.link) {
-			    	var folder = abe.fileUtils.concatPath(abe.config.root, abe.config.data.url)
+			    	var folder = path.join(abe.config.root, abe.config.data.url)
 			    	var files = abe.FileParser.getFiles(folder, true, 99, /\.json/)
-			    	var useFirst = abe.fileUtils.concatPath(path, name)
+			    	var useFirst = path.join(pathUpdate, name)
 						useFirst = abe.fileUtils.removeExtension(useFirst) + '.' + abe.config.files.templates.extension
 			    	Array.prototype.forEach.call(files, function(file) {
 			    		var jsonCheck = abe.FileParser.getJson(file.path)
@@ -161,7 +163,7 @@ var hooks = {
 	},
 	beforeDeleteFile: function(filePath, abe) {
 		abe.log.write('seo', 'beforeDeleteFile')
-    var tplUrl = abe.FileParser.getFileDataFromUrl(abe.fileUtils.concatPath(abe.config.draft.url, filePath))
+    var tplUrl = abe.FileParser.getFileDataFromUrl(path.join(abe.config.draft.url, filePath))
     var json = abe.FileParser.getJson(tplUrl.json.path)
 
     if(typeof json !== 'undefined' && json !== null
@@ -170,7 +172,7 @@ var hooks = {
     	var alternates = json.seoPlugin.alternates
 
     	if (json.seoPlugin.alternates === json.abe_meta.link) {
-	    	var folder = abe.fileUtils.concatPath(abe.config.root, abe.config.data.url)
+	    	var folder = path.join(abe.config.root, abe.config.data.url)
 	    	var files = abe.FileParser.getFiles(folder, true, 99, /\.json/)
 	    	var useFirst = null
 	    	Array.prototype.forEach.call(files, function(file) {
@@ -210,10 +212,10 @@ var hooks = {
 		text = select + text
     return text
   },
-	afterCreate: function(json, text, path, name, req, forceJson, abe) {
+	afterCreate: function(json, text, pathCreate, name, req, forceJson, abe) {
 		if(typeof json.seoPlugin === 'undefined' || json.seoPlugin === null
 			|| typeof json.seoPlugin.alternates === 'undefined' || json.seoPlugin.alternates === null) {
-			var filePath = abe.fileUtils.concatPath(path, name)
+			var filePath = path.join(pathCreate, name)
 			filePath = abe.fileUtils.removeExtension(filePath) + '.' + abe.config.files.templates.extension
 			abe.log.write('seo', 'afterCreate ' + filePath)
 			json['seoPlugin'] = { alternates: filePath };
@@ -221,11 +223,11 @@ var hooks = {
 
 		return json;
 	},
-	afterDuplicate: function(json, oldFilePath, template, path, name, req, deleteFiles, abe) {
+	afterDuplicate: function(json, oldFilePath, template, pathDuplicate, name, req, deleteFiles, abe) {
 		try {
 			if(typeof json.seoPlugin === 'undefined' || json.seoPlugin === null
 				|| typeof json.seoPlugin.alternates === 'undefined' || json.seoPlugin.alternates === null) {
-				var tplUrl = abe.FileParser.getFileDataFromUrl(abe.fileUtils.concatPath(abe.config.draft.url, oldFilePath));
+				var tplUrl = abe.FileParser.getFileDataFromUrl(path.join(abe.config.draft.url, oldFilePath));
 				var oldAlternate = ""
 				var oldJson = abe.FileParser.getJson(tplUrl.json.path);
 				if(typeof oldJson.seoPlugin === 'undefined' || oldJson.seoPlugin === null
