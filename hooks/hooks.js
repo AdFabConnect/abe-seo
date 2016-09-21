@@ -2,38 +2,6 @@
 
 var path = require('path');
 
-function deep_value_array(obj, pathDeep) {
-
-  if(pathDeep.indexOf('.') === -1) {
-    return (typeof obj[pathDeep] !== 'undefined' && obj[pathDeep] !== null) ? obj[pathDeep] : null
-  }
-
-  var pathSplit = pathDeep.split('.')
-  var res = JSON.parse(JSON.stringify(obj))
-
-  while(pathSplit.length > 0) {
-    
-    if(typeof res[pathSplit[0]] !== 'undefined' && res[pathSplit[0]] !== null) {
-      if(typeof res[pathSplit[0]] === 'object' && Object.prototype.toString.call(res[pathSplit[0]]) === '[object Array]') {
-        var resArray = []
-
-        Array.prototype.forEach.call(res[pathSplit[0]], (item) => {
-          resArray.push(Sql.deep_value_array(item, pathSplit.join('.').replace(`${pathSplit[0]}.`, '')))
-        })
-        res = resArray
-        pathSplit.shift()
-      }else {
-        res = res[pathSplit[0]]
-      }
-    }else {
-      return null
-    }
-    pathSplit.shift()
-  }
-
-  return res
-}
-
 function getHreflang (url, json, abe) {
 	var hreflang = "";
 	if(typeof url !== 'undefined' && url !== null) {
@@ -47,7 +15,11 @@ function getHreflang (url, json, abe) {
 					hreflang = hreflang[1];
 				}
 			}else if(typeof abe.config.seo.hreflangVariableJson !== 'undefined' && abe.config.seo.hreflangVariableJson !== null) {
-				hreflang = deep_value_array(json, abe.config.seo.hreflangVariableJson)
+				try	{
+					hreflang = eval('json.' + abe.config.seo.hreflangVariableJson)
+				}catch(e) {
+
+				}
 			}
 		}
 	}
