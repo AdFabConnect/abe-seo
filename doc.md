@@ -2,22 +2,38 @@
 
 > open abe.json file
 
-use regex on your url to extract the lang
+set domain
 
 ```json
-{
-  "seo": {
-    "hreflangRegex": "^\/(.*?)\/"
-  }
-}
+"seo": {
+  "domain":"http://www.accorhotels.com/"
+},
 ```
 
-or use json variable
+replace lang
+
+if lang = "gb" but you want "en" into hreflang value, use
 
 ```json
-{
-  "seo": {
-    "hreflangVariableJson": "lang"
-  }
-}
+"seo": {
+	"replace": {
+	  "gb": "en"
+	}
+},
+```
+
+custom regex get lang
+
+```json
+"seo": {
+	"regex": "^\/([a-zA-z-]*?)\/"
+},
+```
+
+use variable for language instead of param url (may be slower)
+
+```json
+"seo": {
+	"variable": "hreflang"
+},
 ```
