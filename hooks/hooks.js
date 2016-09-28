@@ -45,7 +45,9 @@ function getHreflangs(json, abe) {
 					lang = abe.config.seo.replace[lang]
 				}
 
-				var filePath = (abe.config && abe.config.seo && abe.config.seo.domain) ? path.join(abe.config.seo.domain, file.abe_meta.link) : checkFile.filePath
+				var filePath = (abe.config && abe.config.seo && abe.config.seo.domain)
+					? abe.config.seo.domain.replace(/\/$/, '') + '/' + file.abe_meta.link.replace(/^\//, '')
+					: checkFile.filePath
 				var hreflang = {
 					hreflang: lang,
 					url: filePath,
@@ -118,10 +120,11 @@ var hooks = {
 				htmlHreflangs += '</head>'
 
 				Array.prototype.forEach.call(hreflangs, function(hreflang) {
-					var html = abe.fse.readFileSync(hreflang.html, 'utf8')
+					var htmlPath = path.join(abe.config.root, abe.config.publish.url, hreflang.html)
+					var html = fs.readFileSync(htmlPath, 'utf8')
 					html = html.replace(/<link rel="alternate".+\n/g, '')
 					html = html.replace(/<\/head>/, htmlHreflangs)
-					abe.fse.writeFileSync(hreflang.html, html, {encoding: 'utf8'})
+					abe.fse.writeFileSync(htmlPath, html, {encoding: 'utf8'})
 				})
 			}
 		}
