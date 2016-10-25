@@ -121,10 +121,13 @@ var hooks = {
 
 				Array.prototype.forEach.call(hreflangs, function(hreflang) {
 					var htmlPath = path.join(abe.config.root, abe.config.publish.url, hreflang.html)
-					var html = fs.readFileSync(htmlPath, 'utf8')
-					html = html.replace(/<link rel="alternate".+\n/g, '')
-					html = html.replace(/<\/head>/, htmlHreflangs)
-					abe.fse.writeFileSync(htmlPath, html, {encoding: 'utf8'})
+					try{
+						var html = fs.readFileSync(htmlPath, 'utf8')
+						html = html.replace(/<link rel="alternate".+\n/g, '')
+						html = html.replace(/<\/head>/, htmlHreflangs)
+						abe.fse.writeFileSync(htmlPath, html, {encoding: 'utf8'})
+					}
+					catch(e){}
 				})
 			}
 		}
