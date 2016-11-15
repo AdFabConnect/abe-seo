@@ -10,53 +10,55 @@ function getHreflangs(json, abe) {
 		regLang = new RegExp(abe.config.seo.regex)
 	}
 
-	var files = abe.Manager.instance.getList()
-	var pathToTest = json.abe_meta.link.replace(regLang, '')
-	if(abe.config && abe.config.seo && abe.config.seo.excludeUrlDiff) {
-		var excludeUrlDiff = new RegExp(abe.config.seo.excludeUrlDiff.regex)
-		pathToTest = pathToTest.replace(excludeUrlDiff, abe.config.seo.excludeUrlDiff.regex)
-	}
-	pathToTest = pathToTest.replace(/(\/|\.)/g, '\\$1')
-	pathToTest = new RegExp(pathToTest)
-
-	Array.prototype.forEach.call(files, function(file) {
-		if (file.publish) {
-			if (pathToTest.test(file.abe_meta.link)) {
-				var match = regLang.exec(file.abe_meta.link)
-				var lang = ""
-				if(abe.config && abe.config.seo && abe.config.seo.variable) {
-					try {
-						var lang = eval("file." + abe.config.seo.variable)
-					}catch(e) {
-					}
-					if(typeof lang === 'undefined' || lang === null || lang === "") {
-						var jsonFile = JSON.parse(fs.readFileSync(file.publish.path, 'utf8'));
-						try {
-							var lang = eval("jsonFile." + abe.config.seo.variable)
-						}catch(e) {
-
-						}
-					}
-				}else if(typeof match !== 'undefined' && match !== null) {
-					lang = match[1]
-				}
-
-				if(abe.config && abe.config.seo && abe.config.seo.replace && abe.config.seo.replace[lang]) {
-					lang = abe.config.seo.replace[lang]
-				}
-
-				var filePath = (abe.config && abe.config.seo && abe.config.seo.domain)
-					? abe.config.seo.domain.replace(/\/$/, '') + '/' + file.abe_meta.link.replace(/^\//, '')
-					: checkFile.filePath
-				var hreflang = {
-					hreflang: lang,
-					url: filePath,
-					html: file.abe_meta.link
-				}
-				hreflangs.push(hreflang)
-			}
+	if (json.abe_meta != null) {
+		var files = abe.Manager.instance.getList()
+		var pathToTest = json.abe_meta.link.replace(regLang, '')
+		if(abe.config && abe.config.seo && abe.config.seo.excludeUrlDiff) {
+			var excludeUrlDiff = new RegExp(abe.config.seo.excludeUrlDiff.regex)
+			pathToTest = pathToTest.replace(excludeUrlDiff, abe.config.seo.excludeUrlDiff.regex)
 		}
-	})
+		pathToTest = pathToTest.replace(/(\/|\.)/g, '\\$1')
+		pathToTest = new RegExp(pathToTest)
+
+		Array.prototype.forEach.call(files, function(file) {
+			if (file.publish) {
+				if (pathToTest.test(file.abe_meta.link)) {
+					var match = regLang.exec(file.abe_meta.link)
+					var lang = ""
+					if(abe.config && abe.config.seo && abe.config.seo.variable) {
+						try {
+							var lang = eval("file." + abe.config.seo.variable)
+						}catch(e) {
+						}
+						if(typeof lang === 'undefined' || lang === null || lang === "") {
+							var jsonFile = JSON.parse(fs.readFileSync(file.publish.path, 'utf8'));
+							try {
+								var lang = eval("jsonFile." + abe.config.seo.variable)
+							}catch(e) {
+
+							}
+						}
+					}else if(typeof match !== 'undefined' && match !== null) {
+						lang = match[1]
+					}
+
+					if(abe.config && abe.config.seo && abe.config.seo.replace && abe.config.seo.replace[lang]) {
+						lang = abe.config.seo.replace[lang]
+					}
+
+					var filePath = (abe.config && abe.config.seo && abe.config.seo.domain)
+						? abe.config.seo.domain.replace(/\/$/, '') + '/' + file.abe_meta.link.replace(/^\//, '')
+						: checkFile.filePath
+					var hreflang = {
+						hreflang: lang,
+						url: filePath,
+						html: file.abe_meta.link
+					}
+					hreflangs.push(hreflang)
+				}
+			}
+		})
+	}
 
 	return hreflangs
 }
