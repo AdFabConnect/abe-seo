@@ -1,0 +1,26 @@
+{
+  "name": "abe-seo",
+  "version": "1.0.0",
+  "description": "abe, cms, plugin, seo, hreflang",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdFabConnect/abe-seo.git"
+  },
+  "keywords": [
+    "abe",
+    "cms",
+    "plugin",
+    "seo",
+    "hreflang"
+  ],
+  "author": "Nicolas Labbé",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AdFabConnect/abe-seo/issues"
+  },
+  "homepage": "https://github.com/AdFabConnect/abe-seo#readme"
+}
