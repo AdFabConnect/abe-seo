@@ -116,13 +116,17 @@ var hooks = {
 						? abe.config.seo.domain.replace(/\/$/, '') + '/' + json.abe_meta.link.replace(/^\//, '')
 						: json.abe_meta.link
 
-				json.seoPlugin = {
-					canonical: {
+				var hasCanonical = true;
+				var configCanonical = abe.config.seo.excludeCanonicalTemplates;
+				json.seoPlugin = {};
+				if((typeof configCanonical === 'undefined' || configCanonical === null) || configCanonical.indexOf(json.abe_meta.template) < 0) {
+					json.seoPlugin['canonical'] = {
 						url: filePath,
 						hreflang: lang
-					},
-					hreflangs: getHreflangs(json, abe)
+					};
 				}
+					
+				json.seoPlugin['hreflangs'] = getHreflangs(json, abe);
 			}catch(e) {
 
 			}
@@ -132,7 +136,7 @@ var hooks = {
 	},
 	afterGetTemplate: function(text, abe) {
 		var str = "\n{{#if seoPlugin}}\n"
-			str += "    <link rel=\"canonical\" href=\"{{seoPlugin.canonical.url}}\" />\n"
+			str += "    {{#if seoPlugin.canonical}}<link rel=\"canonical\" href=\"{{seoPlugin.canonical.url}}\" />\n{{/if}}"
 			str += "{{#each seoPlugin.hreflangs}}\n"
 			str += "    <link rel=\"alternate\" href=\"{{url}}\" hreflang=\"{{hreflang}}\" />\n"
 			str += "{{/each}}\n"
