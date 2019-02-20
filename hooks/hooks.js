@@ -4,55 +4,6 @@ var path = require('path');
 var fs = require('fs');
 
 function getHreflangs(json, abe) {
-	// var hreflangs = null
-
-	// if (json.abe_meta != null && abe.config.seo != null && abe.config.seo.templates != null && abe.config.seo.templates[json.abe_meta.template] != null) {
-	// 	hreflangs = []
-	// 	var regex = abe.config.seo.templates[json.abe_meta.template].regex
-	// 	var substitute = abe.config.seo.templates[json.abe_meta.template].substitute
-	// 	var variable = abe.config.seo.templates[json.abe_meta.template].variable
-
-	// 	var files = abe.Manager.instance.getList()
-	// 	var pathToTest = json.abe_meta.link.replace(new RegExp(regex), substitute)
-	// 	pathToTest = new RegExp(pathToTest)
-
-	// 	Array.prototype.forEach.call(files, function(file) {
-	// 		if (file.publish) {
-	// 			if (pathToTest.test(file.abe_meta.link)) {
-	// 				var lang = ""
-	// 				try {
-	// 					var lang = eval("file." + variable)
-	// 				}catch(e) {
-	// 				}
-	// 				if(typeof lang === 'undefined' || lang === null || lang === "") {
-	// 					var jsonFile = JSON.parse(fs.readFileSync(file.publish.path, 'utf8'));
-	// 					try {
-	// 						var lang = eval("jsonFile." + variable)
-	// 					}catch(e) {
-
-	// 					}
-	// 				}
-
-	// 				if(abe.config && abe.config.seo && abe.config.seo.replace && abe.config.seo.replace[lang]) {
-	// 					lang = abe.config.seo.replace[lang]
-	// 				}
-
-	// 				var filePath = (abe.config && abe.config.seo && abe.config.seo.domain)
-	// 					? abe.config.seo.domain.replace(/\/$/, '') + '/' + file.abe_meta.link.replace(/^\//, '')
-	// 					: checkFile.filePath
-
-	// 				var hreflang = {
-	// 					hreflang: lang,
-	// 					url: filePath,
-	// 					html: file.abe_meta.link
-	// 				}
-	// 				hreflangs.push(hreflang)
-	// 			}
-	// 		}
-	// 	})
-	// }
-
-  // return hreflangs
   var hreflangs = []
 	var regLang = new RegExp('^\/([a-zA-z-]*?)\/')
 	if(abe.config && abe.config.seo && abe.config.seo.regex) {
@@ -184,14 +135,16 @@ var hooks = {
 		return json
 	},
 	afterGetTemplate: function(text, abe) {
+    text = text.replace(/\{\{#if seoPlugin\}\}(\r|\t|\n|.)*?\{\{\/if\}\}(\r|\t|\n|.)*?\{\{\/if\}\}/g, '');
+
 		var str = "\n{{#if seoPlugin}}\n"
-			str += "    {{#if seoPlugin.canonical}}<link rel=\"canonical\" href=\"{{seoPlugin.canonical.url}}\" />\n{{/if}}"
-			str += "{{#each seoPlugin.hreflangs}}\n"
-			str += "    <link rel=\"alternate\" href=\"{{url}}\" hreflang=\"{{hreflang}}\" />\n"
-			str += "{{/each}}\n"
-			str += '</head>'
-			str += '{{/if}}'
-		text = text.replace(/<\/head>/, str)
+        str += "  {{#if seoPlugin.canonical}}<link rel=\"canonical\" href=\"{{seoPlugin.canonical.url}}\" />\n{{/if}}"
+        str += "  {{#each seoPlugin.hreflangs}}\n"
+        str += "    <link rel=\"alternate\" href=\"{{url}}\" hreflang=\"{{hreflang}}\" />\n"
+        str += "  {{/each}}\n"
+        str += '{{/if}}'
+        str += '</head>'
+    text = text.replace(/<\/head>/, str);
 		return text
 	}
 };
