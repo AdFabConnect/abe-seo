@@ -8,23 +8,24 @@ function getHreflangs(json, abe) {
 	var regLang = new RegExp('^\/([a-zA-z-]*?)\/')
 	if(abe.config && abe.config.seo && abe.config.seo.regex) {
 		regLang = new RegExp(abe.config.seo.regex)
-	}
-
+  }
+  
 	if (json.abe_meta != null) {
 		var files = abe.Manager.instance.getList()
-		var pathToTest = json.abe_meta.link.replace(regLang, '')
+    var pathToTest = json.abe_meta.link.replace(regLang, '')
 		if(abe.config && abe.config.seo && abe.config.seo.excludeUrlDiff) {
 			var excludeUrlDiff = new RegExp(abe.config.seo.excludeUrlDiff.regex)
-			pathToTest = pathToTest.replace(excludeUrlDiff, abe.config.seo.excludeUrlDiff.regex)
+      pathToTest = pathToTest.replace(excludeUrlDiff, abe.config.seo.excludeUrlDiff.regex)
 		}
-		pathToTest = pathToTest.replace(/(\/|\.)/g, '\\$1')
-		pathToTest = new RegExp(pathToTest)
+    pathToTest = pathToTest.replace(/(\/|\.)/g, '\\$1')
+    pathToTest = new RegExp(pathToTest)
 
 		Array.prototype.forEach.call(files, function(file) {
 			if (file.publish) {
+
 				if (pathToTest.test(file.abe_meta.link)) {
 					var match = regLang.exec(file.abe_meta.link)
-					var lang = ""
+          var lang = ""
 					if(abe.config && abe.config.seo && abe.config.seo.variable) {
 						try {
 							var lang = eval("file." + abe.config.seo.variable)
@@ -107,6 +108,34 @@ var hooks = {
     };
 		return blocks;
 	},
+	afterGetDataListOnSave: function(json, abe) {
+    var hreflangs = getHreflangs(json, abe);
+		if(typeof hreflangs !== 'undefined' && hreflangs !== null) {
+			try {
+				var lang = eval("json." + abe.config.seo.variable)
+				var filePath = (abe.config && abe.config.seo && abe.config.seo.domain)
+						? abe.config.seo.domain.replace(/\/$/, '') + '/' + json.abe_meta.link.replace(/^\//, '')
+						: json.abe_meta.link
+
+				var hasCanonical = true;
+				var configCanonical = abe.config.seo.excludeCanonicalTemplates;
+				json.seoPlugin = {};
+				if((typeof configCanonical === 'undefined' || configCanonical === null) || configCanonical.indexOf(json.abe_meta.template) < 0) {
+					json.seoPlugin['canonical'] = {
+						url: filePath,
+						hreflang: lang
+					};
+				}
+
+        json.seoPlugin['hreflangs'] = getHreflangs(json, abe);
+
+			}catch(e) {
+
+			}
+		}
+
+		return json
+	},
 	beforePublish: function(json, filepath, abe) {
     var hreflangs = getHreflangs(json, abe);
 		if(typeof hreflangs !== 'undefined' && hreflangs !== null) {
@@ -125,8 +154,9 @@ var hooks = {
 						hreflang: lang
 					};
 				}
-					
+
         json.seoPlugin['hreflangs'] = getHreflangs(json, abe);
+        console.log(json.seoPlugin['hreflangs'])
 			}catch(e) {
 
 			}
